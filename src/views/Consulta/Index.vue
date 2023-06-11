@@ -1,0 +1,429 @@
+<template>
+  <main class="px-4 mt-10">
+    <div class="flex justify-between">
+      <arrow-back />
+      <home-page />
+    </div>
+    <title-bar title="Consulta MAOF" subtitle="Agenda de Estimaciones" />
+    <section class="px-4">
+      <!-- Pendientes Pagadas Total -->
+      <div class="flex justify-center text-3xl" v-if="!app.loading">
+        <div
+          class="px-10 text-red cursor-pointer"
+          @click="
+            getStatusEstimations(app.filtro.data.pendientes, 'pendientes')
+          "
+        >
+          <p class="text-center">{{ app.filtro.data.pendientes.length }}</p>
+          <h1 class="text-center">Pendientes</h1>
+        </div>
+        <div
+          class="px-10 text-green cursor-pointer"
+          @click="getStatusEstimations(app.filtro.data.pagados, 'pagadas')"
+        >
+          <p class="text-center">{{ app.filtro.data.pagados.length }}</p>
+          <h1 class="text-center">Pagadas</h1>
+        </div>
+        <div
+          class="px-10 cursor-pointer"
+          @click="getStatusEstimations(app.filtro.data.totales, 'totales')"
+        >
+          <p class="text-center">{{ app.filtro.data.totales.length }}</p>
+          <h1 class="text-center">Total</h1>
+        </div>
+      </div>
+      <!-- Filtro y Busqueda -->
+      <div class="flex flex-col mt-20">
+        <!-- Filtro -->
+        <div class="flex justify-start items-center pb-10">
+          <img
+            src="../../assets/Filter.png"
+            alt="filter"
+            class="w-10 items-center"
+          />
+          <select-base
+            label="Filtros"
+            class="text-center w-48 mr-10"
+            id="filtros"
+            :options="app.filtro.listFiltros"
+            v-model="app.filtro.tipoDocumento"
+            @change="getDocsByType(app.filtro.tipoDocumento)"
+          />
+          <select-base
+            label=""
+            class="text-center w-48 ml-36"
+            id="filtrosDocs"
+            :options="app.filtro.listDocsFiltrados"
+            v-if="
+              app.filtro.listDocsFiltrados != '' &&
+              app.filtro.tipoDocumento !== ''
+            "
+            v-model="app.filtro.filtroDocValue"
+          />
+          <button-base
+            label="Aplicar"
+            class="border-gray text-black hover:bg-white hover:text-red"
+            :class="{
+              'ml-[36rem]': app.filtro.tipoDocumento === '1',
+              ' ml-[3.7rem]':
+                app.filtro.tipoDocumento !== '1' &&
+                app.filtro.filtroDocValue === '',
+              ' ml-[0rem]':
+                app.filtro.tipoDocumento !== '1' &&
+                app.filtro.filtroDocValue !== '',
+            }"
+            v-if="
+              app.filtro.listDocsFiltrados != '' &&
+              app.filtro.tipoDocumento !== ''
+            "
+            @click="
+              saveFiltro(app.filtro.filtroDocValue, app.filtro.tipoDocumento)
+            "
+            :disabled="app.filtro.filtroDocValue === ''"
+          />
+          <button-base
+            label="Aplicar"
+            class="ml-40 border-gray text-black hover:bg-white hover:text-red"
+            v-if="app.filtro.tipoDocumento === '4'"
+            @click="esperandoAccion()"
+          />
+        </div>
+        <!--         Id tipoDocumento {{ app.filtro.tipoDocumento }}
+        <br />
+        id filtroDocValue {{ app.filtro.filtroDocValue }} -->
+        <!-- Busqueda -->
+        <div class="flex justify-start items-center pt-10">
+          <img
+            src="../../assets/Search.png"
+            alt="filter"
+            class="w-10 items-center"
+          />
+          <h1 class="text-center font-bold text-lg">Búsqueda</h1>
+          <!-- <select-base label="Filtros" class="text-center w-48" id="filtros"/> -->
+          <button-base
+            label="Criterio de búsqueda"
+            class="ml-5 border-gray text-black hover:bg-white hover:text-red"
+            @click="showBusqueda"
+          />
+        </div>
+      </div>
+      <div class="flex justify-center">
+        <!-- Form Busqueda -->
+        <form-consulta-busqueda
+          @submit="saveBusqueda"
+          class="mt-20"
+          v-if="showBusquedaValue"
+        />
+      </div>
+    </section>
+  </main>
+</template>
+
+<script>
+import { ref } from "vue";
+import TableBase from "../../components/UsersAndRolsMAOF/TableUsers.vue";
+import ArrowBack from "../../components/ArrowBack.vue";
+import HomePage from "../../components/HomePage.vue";
+import SelectBase from "../../components/SelectBase.vue";
+import ButtonBase from "../../components/ButtonBase.vue";
+import { useRouter } from "vue-router";
+import TitleBar from "../../components/TitleBar.vue";
+import FormConsultaBusqueda from "../../components/Consulta/FormConsultaBusqueda.vue";
+import Swal from "sweetalert2";
+import { fetchProjectsActive } from "./../../api/project";
+import { fetchContracts } from "./../../api/contract";
+import { fetchFiltroAll } from "../../api/consulta";
+import { consultas } from "../../store/consultas";
+
+export default {
+  name: "UsersRolesMAOFIndex",
+  components: {
+    TableBase,
+    ArrowBack,
+    HomePage,
+    ButtonBase,
+    TitleBar,
+    SelectBase,
+    FormConsultaBusqueda,
+  },
+  setup() {
+    const router = useRouter();
+    const store = consultas();
+    const headers = [
+      {
+        label: "Id",
+        field: "empleado_maof",
+      },
+    ];
+    const app = ref({
+      filtro: {
+        tipoDocumento: "",
+        listFiltros: [
+          { value: 2, label: "Contrato o Convenio de Colaboración" },
+          { value: 3, label: "Convenio Modificatorio" },
+          /* { value: 4, label: "Esperando una acción" }, */
+          { value: 1, label: "Proyecto / Cartera de inversión" },
+        ],
+        listDocsFiltrados: [],
+        filtroDocValue: "",
+        data: {
+          pendientes: [],
+          pagados: [],
+          totales: [],
+        },
+      },
+      loading: true,
+    });
+    let showBusquedaValue = ref(false);
+    const featureOptions = [];
+    const getStatusEstimations = (estimacion, estatus) => {
+      switch (estatus) {
+        case "pendientes":
+          if (estimacion.length > 0) {
+            store.addPendientes(estimacion);
+            router.push({
+              name: "ConsultasPedientesMAOF",
+            });
+          } else {
+            console.log("No hay estimaciones pendientes");
+            Swal.fire(
+              "No hay estimaciones",
+              "Intenta con otro filtro",
+              "warning"
+            );
+          }
+          break;
+        case "pagadas":
+          if (estimacion.length > 0) {
+            store.addPagados(estimacion);
+            router.push({
+              name: "ConsultasPagadosMAOF",
+            });
+          } else {
+            console.log("No hay estimaciones pagadas");
+            Swal.fire(
+              "No hay estimaciones",
+              "Intenta con otro filtro",
+              "warning"
+            );
+          }
+          break;
+        case "totales":
+          if (estimacion.length > 0) {
+            store.addTotal(estimacion);
+            router.push({
+              name: "ConsultasTotalesMAOF",
+            });
+          } else {
+            console.log("No hay estimaciones totales");
+            Swal.fire(
+              "No hay estimaciones",
+              "Intenta con otro filtro",
+              "warning"
+            );
+          }
+          break;
+
+        default:
+          console.log("opcion invalida");
+          break;
+      }
+    };
+    const getDocsByType = async (id) => {
+      if (showBusquedaValue.value === true) {
+        showBusquedaValue.value = false;
+      }
+      switch (id) {
+        case "1":
+          //Declaraciones ejecutadas cuando el resultado de expresión coincide con valor 1
+          app.value.filtro.listDocsFiltrados = [];
+          app.value.filtro.filtroDocValue = "";
+          getProjects();
+          break;
+        case "2":
+          //Declaraciones ejecutadas cuando el resultado de expresión coincide con valor 2
+          app.value.filtro.listDocsFiltrados = [];
+          app.value.filtro.filtroDocValue = "";
+          getContracts(id);
+          break;
+        case "3":
+          //Declaraciones ejecutadas cuando el resultado de expresión coincide con valor 3
+          app.value.filtro.listDocsFiltrados = [];
+          app.value.filtro.filtroDocValue = "";
+          getContracts(id);
+          break;
+        case "4":
+          app.value.filtro.listDocsFiltrados = [];
+          app.value.filtro.filtroDocValue = "";
+          //Declaraciones ejecutadas cuando el resultado de expresión coincide con valor 4
+          break;
+        default:
+          //Declaraciones ejecutadas cuando ninguno de los valores coincide con el valor de la expresión
+          console.log("No se encontro nada");
+          break;
+      }
+    };
+
+    const getProjects = async () => {
+      const { data } = await fetchProjectsActive();
+      app.value.filtro.listDocsFiltrados = data.map((project) => ({
+        value: project.id_proyecto,
+        label: `${project.clave_cartera}-${project.nombre_proyecto}`,
+      }));
+    };
+
+    const getContracts = async (id) => {
+      const { data } = await fetchContracts();
+      if (id === "2") {
+        data.forEach((contract) => {
+          if (contract.id_tipo_contrato !== 3) {
+            app.value.filtro.listDocsFiltrados.push({
+              value: contract.id_contrato,
+              label: contract.numero_contrato,
+            });
+            app.value.filtro.listDocsFiltrados.sort((a, b) => {
+              if (a.label > b.label) {
+                return 1;
+              }
+              if (a.label < b.label) {
+                return -1;
+              }
+              // a must be equal to b
+              return 0;
+            });
+          }
+        });
+      }
+      if (id === "3") {
+        data.forEach((contract) => {
+          if (contract.id_tipo_contrato === 3) {
+            app.value.filtro.listDocsFiltrados.push({
+              value: contract.id_contrato,
+              label: contract.numero_contrato,
+            });
+            app.value.filtro.listDocsFiltrados.sort((a, b) => {
+              if (a.label > b.label) {
+                return 1;
+              }
+              if (a.label < b.label) {
+                return -1;
+              }
+              // a must be equal to b
+              return 0;
+            });
+          }
+        });
+      }
+    };
+
+    const showBusqueda = () => {
+      app.value.filtro.tipoDocumento = "";
+      app.value.filtro.filtroDocValue = "";
+      showBusquedaValue.value = !showBusquedaValue.value;
+      /* if (procesoVariable === true) {
+        const { data } = await fetchResidentEstimateHojaViajeraInProgress(9)
+        residentEstimate.value = data
+      }
+      if (procesoVariable === false) {
+        getResidentEstimate()
+      } */
+    };
+
+    const saveBusqueda = async (criterios) => {
+      console.log("Criterios de busqueda: ", criterios);
+      /* try {
+        await storeProject(project)
+        Swal.fire(
+          '¡Éxito!',
+          '!Proyecto guardado con éxito!',
+          'success'
+        )
+        router.push({ name: 'Projects' })
+    
+      } catch (error) {
+        Swal.fire(
+          'Error',
+          `${error.response.data.detail}`,
+          'error'
+        )
+      } */
+      showBusqueda();
+    };
+
+    const saveFiltro = async (id_doc, id_typeDoc) => {
+      app.value.loading = true;
+      let params = {};
+      if (id_typeDoc === "1") {
+        params = { id_proyecto: id_doc };
+      } else if (id_typeDoc === "2" || id_typeDoc === "3") {
+        params = { id_contrato: id_doc };
+      }
+      const { data } = await fetchFiltroAll(params);
+      app.value.filtro.data.totales = data.total;
+      app.value.filtro.data.pagados = data.pagadas;
+      app.value.filtro.data.pendientes = data.pendiente;
+      infoToStore(data.pendiente, data.pagadas, data.total);
+      app.value.loading = false;
+    };
+
+    const infoToStore = (pendiente, pagado, total) => {
+      store.addPendientes(pendiente);
+      store.addPagados(pagado);
+      store.addTotal(total);
+    };
+
+    const getFiltroDefault = async () => {
+      app.value.loading = true;
+      let pagado = [];
+      let pendiente = [];
+      const { data } = await fetchFiltroAll();
+      data.forEach((element) => {
+        if (element.estatus_semaforo !== "Pago Efectuado") {
+          pendiente.push(element);
+        } else {
+          pagado.push(element);
+        }
+      });
+      app.value.filtro.data.totales = data;
+      app.value.filtro.data.pagados = pagado;
+      app.value.filtro.data.pendientes = pendiente;
+      infoToStore(pendiente, pagado, data);
+      app.value.loading = false;
+    };
+
+    getFiltroDefault();
+
+    return {
+      app,
+      featureOptions,
+      headers,
+      /* listFiltros, */
+      showBusquedaValue,
+      getStatusEstimations,
+      showBusqueda,
+      saveBusqueda,
+      saveFiltro,
+      getDocsByType,
+      getProjects,
+      getContracts,
+      getFiltroDefault,
+      infoToStore,
+    };
+  },
+};
+</script>
+
+<style>
+label[for="filtros"] {
+  margin-top: 5px;
+  width: 10px;
+}
+
+select[id="filtros"] {
+  width: 300px;
+}
+
+select[id="filtrosDocs"] {
+  width: fit-content;
+}
+</style>

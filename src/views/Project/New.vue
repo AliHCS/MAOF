@@ -1,6 +1,6 @@
 <template>
   <main class="px-4 mt-10">
-    <arrow-back />
+    <CustomHeaderApp />
     <title-bar title="Proyectos" subtitle="Nuevo" />
     <section class="px-4">
       <form-project @submit="saveProject" />
@@ -11,17 +11,18 @@
 <script>
 import FormProject from '../../components/Project/FormProject.vue'
 import { storeProject } from '../../api/project'
-import ArrowBack from '../../components/ArrowBack.vue'
 import TitleBar from '../../components/TitleBar.vue'
 import { useRouter } from 'vue-router'
 import Swal from 'sweetalert2'
+import CustomHeaderApp from '../../components/CustomHeaderApp.vue'
+
 
 export default {
   name: 'EditProject',
   components: {
     FormProject,
-    ArrowBack,
     TitleBar,
+    CustomHeaderApp,
   },
   setup() {
     const router = useRouter()

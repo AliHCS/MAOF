@@ -1,6 +1,6 @@
 <template>
   <main class="px-4 mt-10">
-    <arrow-back />
+    <CustomHeaderApp />
     <title-bar title="Estimación Residente" subtitle="Nuevo" />
     <section class="px-4">
       <form-resident-estimate />
@@ -10,18 +10,20 @@
 
 <script>
 import FormResidentEstimate from '../../components/ResidentEstimate/FormResidentEstimate.vue'
-import ArrowBack from '../../components/ArrowBack.vue'
 import TitleBar from '../../components/TitleBar.vue'
 import { storeResident } from '../../api/resident'
 import { useRouter } from 'vue-router'
 import Swal from 'sweetalert2'
+import CustomHeaderApp from '../../components/CustomHeaderApp.vue'
+
+
 
 export default {
   name: 'NewResident',
   components: {
     FormResidentEstimate,
-    ArrowBack,
     TitleBar,
+    CustomHeaderApp,
   },
   setup() {
     const router = useRouter()

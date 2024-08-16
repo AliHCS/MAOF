@@ -1,6 +1,6 @@
 <template>
   <main class="px-4 mt-10">
-    <arrow-back />
+    <CustomHeaderApp />
     <title-bar title="Asignación Residente" subtitle="Editar" />
     <section class="px-4">
       <form-assign-resident @submit="saveAssingResident" :assingResident="app.assingResident" edit-mode
@@ -11,20 +11,20 @@
 
 <script>
 import FormAssignResident from '../../components/AssignResident/FormAssignResident.vue'
-import ArrowBack from '../../components/ArrowBack.vue'
 import TitleBar from '../../components/TitleBar.vue'
 import { updateAssingResident, fetchAssingResidentById } from '../../api/assingResident'
 import { reactive } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import Swal from 'sweetalert2'
+import CustomHeaderApp from '../../components/CustomHeaderApp.vue'
 
 
 export default {
   name: 'EditAssingResident',
   components: {
     FormAssignResident,
-    ArrowBack,
     TitleBar,
+    CustomHeaderApp,
   },
   setup() {
     const route = useRoute()

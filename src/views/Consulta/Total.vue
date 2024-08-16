@@ -1,35 +1,16 @@
 <template>
   <main class="px-4 mt-10">
-    <div class="flex justify-between">
-      <arrow-back />
-      <home-page />
-    </div>
+    <CustomHeaderApp />
     <title-bar title="Estimación Residente" subtitle="Totales" />
     <section class="px-4">
       <div class="flex justify-end">
-        <detail-estimate
-          :data="detalleEstimacionData"
-          :isOpen="detalleEstimacion"
-          @submit="detalleEstimacion = false"
-        />
-        <button-base
-          label="Nueva Estimación Residente"
-          @click="goToNewResidentEstimate"
-          class="mb-3 mr-0 ml-auto"
-        />
-        <toggle-switch
-          label="En Proceso"
-          @change="processo"
-          class="mb-3 mr-0 ml-10"
-        />
+        <detail-estimate :data="detalleEstimacionData" :isOpen="detalleEstimacion" @submit="detalleEstimacion = false" />
+        <button-base label="Nueva Estimación Residente" @click="goToNewResidentEstimate" class="mb-3 mr-0 ml-auto"
+          v-if="rol == 'Residente'" />
+        <toggle-switch label="En Proceso" @change="processo" class="mb-3 mr-0 ml-10" />
       </div>
       <!-- <table-base :options="featureOptions" :headers="headers" /> -->
-      <tablero-estimacion-residente
-        :options="featureOptions"
-        :headers="headers"
-        :data="app.total"
-        v-if="!app.loading"
-      />
+      <tablero-estimacion-residente :options="featureOptions" :headers="headers" :data="app.total" v-if="!app.loading" />
       <!-- <tablero-estimacion-residente  /> -->
     </section>
   </main>
@@ -38,9 +19,7 @@
 <script>
 import { ref } from "vue";
 import TableroEstimacionResidente from "../../components/ResidentEstimate/TableroEstimacionResidente.vue";
-import ArrowBack from "../../components/ArrowBack.vue";
 import TitleBar from "../../components/TitleBar.vue";
-import HomePage from "../../components/HomePage.vue";
 import ButtonBase from "../../components/ButtonBase.vue";
 import ToggleSwitch from "../../components/ToggleSwtich.vue";
 import DetailEstimate from "../../components/ResidentEstimate/DetailEstimate.vue";
@@ -48,18 +27,22 @@ import { useRouter, useRoute } from "vue-router";
 import Swal from "sweetalert2";
 import { fetchResidentEstimateById } from "../../api/residentEstimate";
 import { consultas } from '../../store/consultas';
+import { auth } from '../../store/auth'
+import CustomHeaderApp from '../../components/CustomHeaderApp.vue'
+
 export default {
   name: "ConsultaPendientes",
   components: {
     TableroEstimacionResidente,
-    ArrowBack,
-    HomePage,
     ButtonBase,
     TitleBar,
     DetailEstimate,
     ToggleSwitch,
+    CustomHeaderApp,
   },
   setup() {
+    const authStore = auth();
+    const { rol } = authStore.getAuthData
     const app = ref({
       total: {},
       loading: true,
@@ -131,7 +114,6 @@ export default {
         label: "Detalles",
         action: async (residentEstimate) => {
           detalleEstimacion.value = !detalleEstimacion.value;
-          console.log(residentEstimate);
           const { data } = await fetchResidentEstimateById(
             residentEstimate.id_estimacion
           );
@@ -142,15 +124,14 @@ export default {
           data.fecha_periodo_fin_estimacion =
             data.fecha_periodo_fin_estimacion.split(" ")[0];
           detalleEstimacionData.value = data;
-          console.log("data: ", data);
-          console.log("detalleEstimacionData: ", detalleEstimacionData);
         },
       },
       {
-        label: "Nuevo",
-        action: (residentEstimate) =>
-          router.push({
-            name: "NewResidentEstimateById",
+        label: 'Nuevo',
+        disabled: rol != 'Residente',
+        action: (residentEstimate) => router
+          .push({
+            name: 'NewResidentEstimateById',
             params: {
               residentEstimateId: residentEstimate.contrato_estimacion,
             },
@@ -201,7 +182,6 @@ export default {
       // Utilizar el valor del parámetro como necesites
       app.value.loading = true;
       app.value.total = store.filtros.total;
-      console.log('Hola ');
       app.value.loading = false;
     };
 
@@ -214,6 +194,7 @@ export default {
       featureOptions,
       detalleEstimacionData,
       detalleEstimacion,
+      rol,
       goToNewResidentEstimate,
       getQuery,
       processo,

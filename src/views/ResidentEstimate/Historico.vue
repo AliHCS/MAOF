@@ -1,13 +1,14 @@
 <template>
   <main class="px-4 mt-10">
-    <arrow-back />
+    <CustomHeaderApp />
     <title-bar title="Estimación Residente" subtitle="Histórico" />
     <div class="mb-10">
       <div class="flex  items-center ">
         <p class="font-semibold text-center">Número de contrato (de origen)</p>
         <p class=" text-sm text-center ml-2">{{ app.residentEstimate.numero_contrato }}</p>
         <p class="font-semibold text-center ml-80 text-red">Número de la Estimación</p>
-        <p class=" text-xl font-semibold text-red text-center ml-2">{{ app.residentEstimate.num_consecutivo_estimacion }}</p>
+        <p class=" text-xl font-semibold text-red text-center ml-2">{{ app.residentEstimate.num_consecutivo_estimacion }}
+        </p>
         <p class="font-semibold text-center ml-10 text-red">Días transcurridos</p>
         <p class=" text-sm font-semibold text-red text-center ml-4">{{ app.residentEstimate.dias_transcurridos }}</p>
       </div>
@@ -36,7 +37,7 @@
       </div>
       <div class="flex  items-center ">
         <p class="font-semibold text-center">% de avance físico</p>
-        <p class=" text-sm text-center ml-2">{{ app.residentEstimate.porcentaje_Avance_fisico }}%</p>
+        <p class=" text-sm text-center ml-2">{{ app.residentEstimate.porcentaje_avance_fisico }}%</p>
         <p class="font-semibold text-center ml-2">% de avance financiero</p>
         <p class=" text-sm text-center ml-2">{{ app.residentEstimate.porcensaje_avance_financiero }}%</p>
         <p class="font-semibold text-center  ml-2">% de grado de avance</p>
@@ -47,28 +48,30 @@
         <p class=" text-sm text-center ml-2">{{ app.residentEstimate.porcentaje_avance_estimacion_acumulado }}%</p>
       </div>
     </div>
-    <table-base-index class="mb-10"  :headers="headers" :data="app.residentEstimateHistory" :option="[]" />
+    <table-base-index class="mb-10" description="Histórico" :headers="headers" :data="app.residentEstimateHistory"
+      :option="[]" />
     <!-- <form-resident-estimate :residentEstimate="app.residentEstimate" editMode v-if="!app.loading"/> -->
   </main>
 </template>
 
 <script>
 import FormResidentEstimate from '../../components/ResidentEstimate/FormResidentEstimateSemaforoById.vue'
-import ArrowBack from '../../components/ArrowBack.vue'
 import TitleBar from '../../components/TitleBar.vue'
 import TableBaseIndex from '../../components/TableBaseIndex.vue'
 import { fetchResidentEstimateById, fetchHistoryResidentEstimateById } from '../../api/residentEstimate'
 import { reactive } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import Swal from 'sweetalert2'
+import CustomHeaderApp from '../../components/CustomHeaderApp.vue'
+
 
 export default {
   name: 'Historico',
   components: {
     FormResidentEstimate,
-    ArrowBack,
     TitleBar,
     TableBaseIndex,
+    CustomHeaderApp,
   },
   setup() {
     const route = useRoute()
@@ -102,7 +105,6 @@ export default {
     const getResidentById = async () => {
       app.loading = true
       const { data } = await fetchResidentEstimateById(route.params.residentEstimateId)
-      console.log(data)
       app.residentEstimate = data
       app.fecha_recepcion_info_contratista = data.fecha_recepcion_info_contratista.split(" ")[0]
       app.fecha_periodo_inicio_estimacion = data.fecha_periodo_inicio_estimacion.split(" ")[0]
@@ -112,9 +114,7 @@ export default {
     const getHistoryById = async () => {
       app.loading = true
       const { data } = await fetchHistoryResidentEstimateById(route.params.residentEstimateId)
-      console.log('HIstorico: ', data)
       app.residentEstimateHistory = data
-      console.log('app.residentEstimateHistory: ', app.residentEstimateHistory)
       app.loading = false
     }
     const saveResident = async (resident) => {
@@ -133,8 +133,8 @@ export default {
 
     return {
       app,
-      saveResident,
       headers,
+      saveResident,
     }
   },
 }

@@ -1,12 +1,12 @@
 <template>
-  <main class="px-4 mt-10">
+  <main class="px-4 mt-10 h-[47vh]">
     <title-bar title="Login" subtitle="Inicio" />
     <section class="px-4">
       <div class="max-w-xl mx-auto">
         <input-base id="email" label="Email" type="email" class="mb-3" v-model="user.email" />
-        {{ user.email }}
+        <!--         {{ user.email }} -->
         <input-base id="password" label="Password" type="password" class="mb-3" v-model="user.password" />
-        {{ user.password }}
+        <!--         {{ user.password }} -->
         <button-base label="Enviar" @click="sendForm" class="mr-0 ml-auto" />
       </div>
     </section>
@@ -21,6 +21,7 @@ import TitleBar from '../components/TitleBar.vue'
 import InputBase from '../components/InputBase.vue'
 import Swal from 'sweetalert2'
 import { loginUser } from '../api/auth'
+import { auth } from "../store/auth";
 
 
 export default {
@@ -32,6 +33,7 @@ export default {
   },
   setup() {
     const router = useRouter()
+    const store = auth();
     const user = ref({
       email: '',
       password: '',
@@ -40,30 +42,33 @@ export default {
       try {
         const { data } = await loginUser(user.value)
         //setItem se asigna el item
-        console.log(data);
-        localStorage.setItem('acces', data.access)
+        /* console.log(data); */
+        store.setToLocalStore(data)
+        store.setInfo()
+        /* localStorage.setItem('acces', data.access)
         localStorage.setItem('refresh', data.refresh)
-        router.push({ name: 'Home' })
-        console.log(localStorage.getItem('acces'));
-        console.log(localStorage.getItem('refresh'));
+        localStorage.setItem('rol', data.rol)
+        localStorage.setItem('id_empleado', data.id_empleado) */
+        logIn()
 
       } catch (error) {
-        console.log('error: ', error)
-
+        Swal.fire(
+          "Error",
+          "Usuario y/o contraseña incorrecta",
+          "error"
+        );
       }
-      //setItem se asigna el item
-      /*  localStorage.setItem('token', response.token)
-      localStorage.setItem('rol', response.rol) */
-      //se consulta el item
-      /* const token = localStorage.getItem('token')
-      const isAdmin = localStorage.getItem('rol') === 'Admin' */
     }
-
-
-
+    const logIn = () => {
+      if (store.access !== null) {
+        router.push({ name: 'Home' })
+      }
+    }
+    logIn()
     return {
-      sendForm,
       user,
+      sendForm,
+      logIn,
     }
   },
 }

@@ -6,7 +6,9 @@ export const consultas = defineStore("consultas", {
       pendientes: [],
       pagados: [],
       total: [],
+      responsableEstimacion: [],
     },
+    busqueda:[]
   }),
   actions: {
     addPendientes(pendientes) {
@@ -17,6 +19,12 @@ export const consultas = defineStore("consultas", {
     },
     addTotal(total) {
       this.filtros.total = total;
+    },
+    addBusqueda(busquedaResult) {
+      this.busqueda = busquedaResult;
+    },
+    addResponsableEstimacion(responsableEstimacion) {
+      this.filtros.responsableEstimacion = responsableEstimacion;
     },
   },
   getters: {

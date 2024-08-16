@@ -1,9 +1,10 @@
-import fetchApi from "./fetchApi"
+import fetchApi from "./fetchApi";
 
-const fetchContractors = () => fetchApi({
-  url: 'cat-contratista/',
-  method: 'GET',
-})
+const fetchContractors = () =>
+  fetchApi({
+    url: "cat-contratista/",
+    method: "GET",
+  });
 
 /* const fetchContractors = () => fetchApi({
   url: 'cat-contratista/',
@@ -17,6 +18,4 @@ const fetchContractors = () => fetchApi({
   },
 }) */
 
-export {
-  fetchContractors,
-}
+export { fetchContractors };

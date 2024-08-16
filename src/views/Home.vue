@@ -1,59 +1,47 @@
+Certainly! Here's the code without the background image and related styling:
+
+```html
 <template>
-  <main class="px-4 pt-20">
-    <div class="flex">
-      <div v-for="(item, index) in menu" :key="index">
-        <button-base :label="item.labelMenu" v-if="item.routeName !== ''"
-          class="border-gray-600 text-gray-600 hover:bg-gray-600 hover:text-white text-lg font-normal relative"
-          @click="goToRoute(item.routeName)" />
-        <button-base :label="item.labelMenu" v-if="item.routeName === ''"
-          class="border-gray-600 text-gray-600 hover:bg-gray-600 hover:text-white text-lg font-normal relative"
-          @click="showSubmenu(index)" />
-        <div
-          class="flex flex-col bg-white rounded shadow-lg border border-gray-100 border-solid absolute py-1 text-gray-900 text-lg"
-          v-show="indexActiveSubmenu === index">
-          <p v-for="(item, index) in item.submenu" :key="index" class="py-2 px-5 cursor-pointer hover:bg-gray-50">
-          <div v-if="item.subMenu2.length !== 0">
-            <p @click="showSubmenu2(index)">
-              {{ item.labelSubMenu }}
-            </p>
-            <div v-show="indexActiveSubmenu2 === index" class="flex flex-col justify-end justify-items-end">
-              <span v-for="(item, index) in item.subMenu2" :key="index"
-                class="py-2 px-5 cursor-pointer hover:bg-gray-50 relative">
-                <router-link :to="{ name: item.routeName }">
-                  {{ item.label }}
-                </router-link>
-              </span>
+  <div class="h-[55vh] bg-filter-image">
+    <div class="flex justify-end pt-10">
+      <ManualComponent />
+      <p class="text-black font-semibold pr-4">{{ nombre_completo }}</p>
+      <p class="text-black font-semibold">{{ rol }}</p>
+      <logout-component />
+    </div>
+    <div class="flex flex-col px-4 h-[85%]">
+      <div class="flex">
+        <div v-for="(item, index) in menu" :key="index">
+          <template v-if="item.activo">
+            <button-base :label="item.labelMenu" v-if="item.routeName !== ''"
+              class="border-gray-600 text-gray-600 hover:bg-gray-600 hover:text-white text-lg font-normal relative"
+              @click="goToRoute(item.routeName)" />
+            <button-base :label="item.labelMenu" v-if="item.routeName === ''"
+              class="border-gray-600 text-gray-600 hover:bg-gray-600 hover:text-white text-lg font-normal relative"
+              @click="showSubmenu(index)" />
+            <div
+              class="flex flex-col bg-white rounded shadow-lg border border-gray-100 border-solid absolute py-1 text-gray-900 text-lg"
+              v-show="indexActiveSubmenu === index">
+              <p v-for="(item, index) in item.submenu" :key="index" class="py-2 px-5 cursor-pointer hover:bg-gray-50">
+              <div v-if="item.subMenu2.length !== 0">
+                <p @click="showSubmenu2(index)">{{ item.labelSubMenu }}</p>
+                <div v-show="indexActiveSubmenu2 === index" class="flex flex-col justify-end justify-items-end">
+                  <span v-for="(item, index) in item.subMenu2" :key="index"
+                    class="py-2 px-5 cursor-pointer hover:bg-gray-50 relative">
+                    <router-link :to="{ name: item.routeName }">{{ item.label }}</router-link>
+                  </span>
+                </div>
+              </div>
+              <router-link :to="{ name: item.routeName }" v-if="item.subMenu2.length === 0">
+                {{ item.labelSubMenu }}
+              </router-link>
+              </p>
             </div>
-          </div>
-          <router-link :to="{ name: item.routeName }" v-if="item.subMenu2.length === 0">
-            {{ item.labelSubMenu }}
-          </router-link>
-          </p>
+          </template>
         </div>
       </div>
     </div>
-  </main>
-  <!-- <main class="px-4 pt-20">
-    <div class="flex">
-      <div v-for="(item, index) in menu" :key="index">
-        <button-base
-          :label="item.labelMenu"
-          class="border-gray-600 text-gray-600 hover:bg-gray-600 hover:text-white text-lg font-normal relative"
-          @click="showSubmenu(index)"
-        />
-        <div
-          class="bg-white rounded shadow-lg border border-gray-100 border-solid absolute mt-1 py-1 text-gray-900 text-lg"
-          v-show="indexActiveSubmenu === index"
-        >
-          <p v-for="(item, index) in item.submenu" :key="index" class="py-2 px-5 cursor-pointer hover:bg-gray-50">
-            <router-link :to="{ name: item.routeName }">
-              {{ item.label }}
-            </router-link>
-          </p>
-        </div>
-      </div>
-    </div>
-  </main> -->
+  </div>
 </template>
 
 <script>
@@ -61,8 +49,11 @@ import InputBase from '../components/InputBase.vue';
 import SelectBase from '../components/SelectBase.vue';
 import ButtonBase from '../components/ButtonBase.vue';
 import TableBase from '../components/TableBase.vue';
+import LogoutComponent from '../components/LogoutComponent.vue';
+import ManualComponent from '../components/ManualComponent.vue';
 import { ref } from 'vue';
 import { useRouter } from 'vue-router'
+import { auth } from '../store/auth'
 
 export default {
   name: 'Home',
@@ -71,6 +62,8 @@ export default {
     ButtonBase,
     TableBase,
     SelectBase,
+    LogoutComponent,
+    ManualComponent,
   },
   /*  mounted() {
      if (localStorage.getItem('acces') != null) {
@@ -81,21 +74,26 @@ export default {
    }, */
   setup() {
     const router = useRouter()
+    const store = auth()
+    const { access, rol, nombre_completo } = store.getAuthData
     const menu = [
       {
         labelMenu: 'Consulta',
         submenu: [],
-        routeName: 'ConsultasMAOF'
+        routeName: 'ConsultasMAOF',
+        activo: true
       },
       {
         labelMenu: 'Estimaciones',
         submenu: [],
         /* routeName: 'ResidentEstimate' */
-        routeName: 'ResidentEstimate'
+        routeName: 'ResidentEstimate',
+        activo: true
       },
       {
         labelMenu: 'Obras y Contratos',
         routeName: '',
+        activo: rol.includes('Obras y Contratos'),
         submenu: [
           {
             labelSubMenu: 'Medios',
@@ -141,6 +139,7 @@ export default {
       {
         labelMenu: 'Administración MAOF',
         routeName: '',
+        activo: rol === 'Administrador MAOF',
         submenu: [
           {
             labelSubMenu: 'Usuarios y roles',
@@ -180,21 +179,31 @@ export default {
       return indexActiveSubmenu2.value = index
     }
     const logIn = () => {
-      if (localStorage.getItem('acces') === null) {
+      if (access === null) {
         router.push({ name: 'Login' })
       }
     }
     const goToRoute = (routerName) => router.push({ name: routerName })
-    /* logIn() */
+    logIn()
     return {
       menu,
-      showSubmenu,
-      showSubmenu2,
       indexActiveSubmenu,
       indexActiveSubmenu2,
+      rol,
+      nombre_completo,
+      showSubmenu,
+      showSubmenu2,
       goToRoute,
       logIn,
     }
   },
 }
 </script>
+<style>
+.bg-filter-image {
+  background-image: url('../assets/tren.jpeg');
+  background-size: 45%;
+  background-repeat: no-repeat;
+  background-position: 50% 30px;
+}
+</style>

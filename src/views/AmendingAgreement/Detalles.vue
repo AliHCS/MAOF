@@ -1,10 +1,8 @@
 <template>
   <main class="px-4 mt-10">
-    <arrow-back />
     <title-bar title="Áreas revisoras" subtitle="Editar" />
     <section class="px-4">
       <!-- <form-amending-agreement @submit="saveAmendingAgreement" :amendingAgreement="app.amendingAgreement" edit-mode v-if="!app.loading" /> -->
-    
     </section>
   </main>
 </template>
@@ -13,10 +11,10 @@
 import FormAmendingAgreement from '../../components/AmendingAgreement/FormAmendingAgreement.vue'
 import ArrowBack from '../../components/ArrowBack.vue'
 import TitleBar from '../../components/TitleBar.vue'
-import { updateResident, fetchResidentById } from '../../api/resident'
 import { reactive } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import Swal from 'sweetalert2'
+import LogoutComponent from '../../components/LogoutComponent.vue'
 
 export default {
   name: 'DetallesCollaborationAgreements',
@@ -24,6 +22,7 @@ export default {
     FormAmendingAgreement,
     ArrowBack,
     TitleBar,
+    LogoutComponent
   },
   setup() {
     const route = useRoute()

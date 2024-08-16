@@ -1,32 +1,34 @@
 <template>
   <main class="px-4 mt-10">
-    <arrow-back />
-    <title-bar title="Estimación Residente" subtitle="Editar" />
+    <CustomHeaderApp />
+    <title-bar title="Estimación Residente" :subtitle="subtitle" />
     <section class="px-4">
-      <form-resident-estimate :residentEstimate="app.residentEstimate" editMode v-if="!app.loading"/>
+      <form-resident-estimate :residentEstimate="app.residentEstimate" editMode v-if="!app.loading" />
     </section>
   </main>
 </template>
 
 <script>
 import FormResidentEstimate from '../../components/ResidentEstimate/FormResidentEstimateSemaforoById.vue'
-import ArrowBack from '../../components/ArrowBack.vue'
 import TitleBar from '../../components/TitleBar.vue'
 import { fetchResidentEstimateById } from '../../api/residentEstimate'
-import { reactive } from 'vue'
+import { reactive, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import Swal from 'sweetalert2'
+import CustomHeaderApp from '../../components/CustomHeaderApp.vue'
+
 
 export default {
   name: 'EditResident',
   components: {
     FormResidentEstimate,
-    ArrowBack,
     TitleBar,
+    CustomHeaderApp,
   },
   setup() {
     const route = useRoute()
     const router = useRouter()
+    const subtitle = ref('Editar')
     const app = reactive({
       residentEstimate: {},
       loading: true,
@@ -36,6 +38,7 @@ export default {
       const { data } = await fetchResidentEstimateById(route.params.residentEstimateId)
       app.residentEstimate = data
       app.loading = false
+      changeSubtitle()
     }
     const saveResident = async (resident) => {
       await updateResident(resident)
@@ -48,10 +51,18 @@ export default {
       router.push({ name: 'Resident' })
     }
 
+    const changeSubtitle = () => {
+      /* if(app.residentEstimate.estatus_semaforo != 'Residente') */
+      subtitle.value = app.residentEstimate.estatus_estimacion
+    }
+
+
+
     getResidentById()
 
     return {
       app,
+      subtitle,
       saveResident,
     }
   },

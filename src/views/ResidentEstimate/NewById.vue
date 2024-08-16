@@ -1,6 +1,6 @@
 <template>
   <main class="px-4 mt-10">
-    <arrow-back />
+    <CustomHeaderApp />
     <title-bar title="Estimación Residente" subtitle="Nuevo" />
     <section class="px-4">
       <form-resident-estimate :residentEstimate="app.residentEstimate" edit-mode v-if="!app.loading" />
@@ -10,25 +10,26 @@
 
 <script>
 import FormResidentEstimate from '../../components/ResidentEstimate/FormResidentEstimateById.vue'
-import ArrowBack from '../../components/ArrowBack.vue'
 import TitleBar from '../../components/TitleBar.vue'
 import { fetchContractById } from '../../api/contract'
 import { reactive } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import Swal from 'sweetalert2'
+import CustomHeaderApp from '../../components/CustomHeaderApp.vue'
+
 
 export default {
   name: 'NewResidentbyId',
   components: {
     FormResidentEstimate,
-    ArrowBack,
     TitleBar,
+    CustomHeaderApp,
   },
   setup() {
     const route = useRoute()
     const router = useRouter()
     const app = reactive({
-      residentEstimate: { id_contrato: '', num_consecutivo_estimacion: '',numero_contrato:'', objeto_contrato:'' },
+      residentEstimate: { id_contrato: '', num_consecutivo_estimacion: '', numero_contrato: '', objeto_contrato: '' },
       loading: true,
     })
     const getResidentById = async () => {

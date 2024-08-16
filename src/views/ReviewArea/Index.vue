@@ -1,17 +1,10 @@
 <template>
   <main class="px-4 mt-10">
-    <div class="flex justify-between">
-      <arrow-back  />
-      <home-page />
-    </div>
+    <CustomHeaderApp />
     <title-bar title="Áreas revisoras" subtitle="Inicio" />
     <section class="px-4">
       <button-base label="Nueva área revisora" @click="goToNewReviewArea" class="mb-3 mr-0 ml-auto" />
-      <table-base
-        :options="featureOptions"
-        :headers="headers"
-        :data="reviewAreas"
-      />
+      <table-base description="Áreas revisoras" :options="featureOptions" :headers="headers" :data="reviewAreas" />
     </section>
   </main>
 </template>
@@ -20,20 +13,19 @@
 import { ref } from 'vue'
 import TableBase from '../../components/TableBase.vue'
 import { fetchReviewAreas } from './../../api/reviewArea'
-import ArrowBack from '../../components/ArrowBack.vue'
-import HomePage from '../../components/HomePage.vue'
 import ButtonBase from '../../components/ButtonBase.vue'
 import { useRouter } from 'vue-router'
 import TitleBar from '../../components/TitleBar.vue'
+import CustomHeaderApp from '../../components/CustomHeaderApp.vue'
+
 
 export default {
   name: 'ReviewAreasIndex',
   components: {
     TableBase,
-    ArrowBack,
-    HomePage,
     ButtonBase,
     TitleBar,
+    CustomHeaderApp,
   },
   setup() {
     const router = useRouter()

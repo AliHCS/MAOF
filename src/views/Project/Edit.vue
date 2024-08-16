@@ -1,6 +1,6 @@
 <template>
   <main class="px-4 mt-10">
-    <arrow-back />
+    <CustomHeaderApp />
     <title-bar title="Proyectos" subtitle="Editar" />
     <section class="px-4">
       <form-project @submit="saveProject" :project="app.project" edit-mode v-if="!app.loading" />
@@ -10,20 +10,22 @@
 
 <script>
 import FormProject from '../../components/Project/FormProject.vue'
-import ArrowBack from '../../components/ArrowBack.vue'
 import TitleBar from '../../components/TitleBar.vue'
 import { updateProject, fetchProjectById } from '../../api/project'
 import { reactive } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import Swal from 'sweetalert2'
+import CustomHeaderApp from '../../components/CustomHeaderApp.vue'
+
 
 
 export default {
   name: 'EditProject',
   components: {
     FormProject,
-    ArrowBack,
     TitleBar,
+    CustomHeaderApp,
+
   },
   setup() {
     const route = useRoute()

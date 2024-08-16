@@ -1,13 +1,10 @@
 <template>
   <main class="px-4 mt-10">
-    <div class="flex justify-between">
-      <arrow-back />
-      <home-page />
-    </div>
+    <CustomHeaderApp />
     <title-bar title="Usuarios y Roles MAOF" subtitle="Inicio" />
     <section class="px-4">
       <button-base label="Alta de usuarios MAOF" @click="goToNewUserAndRols" class="mb-3 mr-0 ml-auto" />
-      <table-base :options="featureOptions" :headers="headers" :data="userAndRols" />
+      <table-base description="Usuarios MAOF" :options="featureOptions" :headers="headers" :data="userAndRols" />
     </section>
   </main>
 </template>
@@ -16,21 +13,20 @@
 import { ref } from 'vue'
 import TableBase from '../../components/UsersAndRolsMAOF/TableUsers.vue'
 import { fetchUser, deleteUser } from './../../api/users'
-import ArrowBack from '../../components/ArrowBack.vue'
-import HomePage from '../../components/HomePage.vue'
 import ButtonBase from '../../components/ButtonBase.vue'
 import { useRouter } from 'vue-router'
 import TitleBar from '../../components/TitleBar.vue'
 import Swal from 'sweetalert2'
+import CustomHeaderApp from '../../components/CustomHeaderApp.vue'
+
 
 export default {
   name: 'UsersRolesMAOFIndex',
   components: {
     TableBase,
-    ArrowBack,
-    HomePage,
     ButtonBase,
     TitleBar,
+    CustomHeaderApp,
   },
   setup() {
     const router = useRouter()
@@ -70,7 +66,6 @@ export default {
       {
         label: 'Editar',
         action: (userAndRol) => {
-          console.log(userAndRol);
           router.push({
             name: 'EditUsersRolesMAOF',
             params: {
@@ -124,7 +119,7 @@ export default {
             }).then(async (result) => {
               if (result.isConfirmed) {
                 try {
-                  userAndRolStatus.estatus_empleado  = false
+                  userAndRolStatus.estatus_empleado = false
                   await deleteUser(userAndRol.empleado_maof, userAndRolStatus)
                   await getUserAndRols()
                   Swal.fire(

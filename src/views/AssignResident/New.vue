@@ -1,6 +1,6 @@
 <template>
   <main class="px-4 mt-10">
-    <arrow-back />
+    <CustomHeaderApp />
     <title-bar title="Asignación Residente" subtitle="Nuevo" />
     <section class="px-4">
       <form-assign-resident @submit="saveAssingResident" />
@@ -10,19 +10,20 @@
 
 <script>
 import FormAssignResident from '../../components/AssignResident/FormAssignResident.vue'
-import ArrowBack from '../../components/ArrowBack.vue'
 import TitleBar from '../../components/TitleBar.vue'
 import { storeAssingResident } from '../../api/assingResident'
 import { useRoute, useRouter } from 'vue-router'
 import Swal from 'sweetalert2'
+import CustomHeaderApp from '../../components/CustomHeaderApp.vue'
+
 
 
 export default {
   name: 'NewAssingResident',
   components: {
     FormAssignResident,
-    ArrowBack,
     TitleBar,
+    CustomHeaderApp,
   },
   setup() {
     const route = useRoute()
@@ -33,7 +34,7 @@ export default {
         await storeAssingResident(assingResident)
         Swal.fire(
           '¡Éxito!',
-          'Asignacion guardada con éxito!',
+          'Asignación guardada con éxito!',
           'success'
         )
       } catch (error) {

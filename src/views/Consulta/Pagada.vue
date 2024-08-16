@@ -1,14 +1,12 @@
 <template>
   <main class="px-4 mt-10">
-    <div class="flex justify-between">
-      <arrow-back />
-      <home-page />
-    </div>
+    <CustomHeaderApp />
     <title-bar title="Estimación Residente" subtitle="Pagadas" />
     <section class="px-4">
       <div class=" flex justify-end">
         <detail-estimate :data="detalleEstimacionData" :isOpen="detalleEstimacion" @submit="detalleEstimacion = false" />
-        <button-base label="Nueva Estimación Residente" @click="goToNewResidentEstimate" class="mb-3 mr-0 ml-auto" />
+        <button-base label="Nueva Estimación Residente" @click="goToNewResidentEstimate" class="mb-3 mr-0 ml-auto"
+          v-if="rol == 'Residente'" />
       </div>
       <!-- <table-base :options="featureOptions" :headers="headers" /> -->
       <tablero-estimacion-residente :options="featureOptions" :headers="headers" :data="app.pagados"
@@ -21,26 +19,27 @@
 <script>
 import { ref } from 'vue';
 import TableroEstimacionResidente from '../../components/ResidentEstimate/TableroEstimacionResidente.vue'
-import ArrowBack from '../../components/ArrowBack.vue'
 import TitleBar from '../../components/TitleBar.vue'
-import HomePage from '../../components/HomePage.vue'
 import ButtonBase from '../../components/ButtonBase.vue'
 import DetailEstimate from '../../components/ResidentEstimate/DetailEstimate.vue'
 import { useRouter, useRoute } from 'vue-router'
-import Swal from 'sweetalert2'
 import { fetchResidentEstimateById } from "../../api/residentEstimate";
 import { consultas } from '../../store/consultas';
+import { auth } from '../../store/auth'
+import CustomHeaderApp from '../../components/CustomHeaderApp.vue'
+
 export default {
   name: 'ConsultasPagadosMAOF',
   components: {
     TableroEstimacionResidente,
-    ArrowBack,
-    HomePage,
     ButtonBase,
     TitleBar,
     DetailEstimate,
+    CustomHeaderApp,
   },
   setup() {
+    const authStore = auth();
+    const { rol } = authStore.getAuthData
     const app = ref({
       pagados: {},
       loading: true,
@@ -112,18 +111,16 @@ export default {
         label: 'Detalles',
         action: async (residentEstimate) => {
           detalleEstimacion.value = !detalleEstimacion.value
-          console.log(residentEstimate);
           const { data } = await fetchResidentEstimateById(residentEstimate.id_estimacion)
           data.fecha_recepcion_info_contratista = data.fecha_recepcion_info_contratista.split(" ")[0]
           data.fecha_periodo_inicio_estimacion = data.fecha_periodo_inicio_estimacion.split(" ")[0]
           data.fecha_periodo_fin_estimacion = data.fecha_periodo_fin_estimacion.split(" ")[0]
           detalleEstimacionData.value = data
-          console.log('data: ', data)
-          console.log('detalleEstimacionData: ', detalleEstimacionData)
         }
       },
       {
         label: 'Nuevo',
+        disabled: rol != 'Residente',
         action: (residentEstimate) => router
           .push({
             name: 'NewResidentEstimateById',
@@ -166,8 +163,6 @@ export default {
       // Utilizar el valor del parámetro como necesites
       app.value.loading = true
       app.value.pagados = store.filtros.pagados
-      console.log(store.filtros.pagados);
-      console.log('Valor del parámetro:', app.value.pagados);
       app.value.loading = false
     }
     getQuery()
@@ -177,6 +172,7 @@ export default {
       featureOptions,
       detalleEstimacionData,
       detalleEstimacion,
+      rol,
       goToNewResidentEstimate,
       getQuery,
     }

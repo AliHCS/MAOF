@@ -1,14 +1,12 @@
 <template>
   <main class="px-4 mt-10">
-    <div class="flex justify-between">
-      <arrow-back  />
-      <home-page />
-    </div>
+    <CustomHeaderApp />
     <title-bar title="Contratos y Convenios de Colaboración" subtitle="Inicio" />
     <section class="px-4">
       <button-base label="Nuevo Contrato o Convenio de Colaboración" @click="goToNewCollaborationAgreements"
         class="mb-3 mr-0 ml-auto" />
-      <table-base :options="featureOptions" :headers="headers" :data="collaborationAgreements" />
+      <table-base description="Contratos y convenios de colaboración" :options="featureOptions" :headers="headers"
+        :data="collaborationAgreements" />
     </section>
   </main>
 </template>
@@ -17,21 +15,19 @@
 import { ref } from 'vue'
 import TableBase from '../../components/TableBase.vue'
 import { fetchContracts, deleteContract } from './../../api/contract'
-import ArrowBack from '../../components/ArrowBack.vue'
-import HomePage from '../../components/HomePage.vue'
 import ButtonBase from '../../components/ButtonBase.vue'
 import { useRouter } from 'vue-router'
 import TitleBar from '../../components/TitleBar.vue'
 import Swal from 'sweetalert2'
+import CustomHeaderApp from '../../components/CustomHeaderApp.vue'
 
 export default {
   name: 'CollaborationAgreementsIndex',
   components: {
     TableBase,
-    ArrowBack,
-    HomePage,
     ButtonBase,
     TitleBar,
+    CustomHeaderApp,
   },
   setup() {
     const router = useRouter()

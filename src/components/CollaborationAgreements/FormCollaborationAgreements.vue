@@ -72,8 +72,8 @@ export default {
     if (props.editMode) {
       app.collaborationAgreements = props.collaborationAgreements
       delete props.collaborationAgreements.id_contrato_padre
-      app.collaborationAgreements.plazo_inicio = props.collaborationAgreements.plazo_inicio.split('-').reverse().join('-')
-      app.collaborationAgreements.plazo_fin = props.collaborationAgreements.plazo_fin.split('-').reverse().join('-')
+      app.collaborationAgreements.plazo_inicio = props.collaborationAgreements.plazo_inicio.split('/').reverse().join('-')
+      app.collaborationAgreements.plazo_fin = props.collaborationAgreements.plazo_fin.split('/').reverse().join('-')
     }
     const sendForm = () => emit('submit', app.collaborationAgreements)
 
@@ -105,6 +105,16 @@ export default {
       data.forEach(contrato => {
         if (contrato.estatus_contratista === 'Activo') {
           app.listContratista.push({ value: contrato.id_contratista, label: contrato.nombre_contratista })
+          app.listContratista.sort((a, b) => {
+            if (a.nombre_contratista > b.nombre_contratista) {
+              return 1;
+            }
+            if (a.nombre_contratista < b.nombre_contratista) {
+              return -1;
+            }
+            // a must be equal to b
+            return 0;
+          })
         }
       });
     }

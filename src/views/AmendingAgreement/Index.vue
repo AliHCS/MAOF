@@ -1,13 +1,11 @@
 <template>
   <main class="px-4 mt-10">
-    <div class="flex justify-between">
-      <arrow-back  />
-      <home-page />
-    </div>
+    <CustomHeaderApp />
     <title-bar title="Convenio Modificatorio" subtitle="Inicio" />
     <section class="px-4">
       <button-base label="Nuevo Convenio Modificatorio" @click="goToNewAmendingAgreement" class="mb-3 mr-0 ml-auto" />
-      <table-base :options="featureOptions" :headers="headers" :data="amendingAgreement" />
+      <table-base description="Convenios Modificatorios" :options="featureOptions" :headers="headers"
+        :data="amendingAgreement" />
       <div class="root">
         <teleport to="body">
           <div class="modal items-center justify-center" v-if="isOpen">
@@ -82,21 +80,20 @@
 import { ref } from 'vue'
 import TableBase from '../../components/TableBase.vue'
 import { fetchContracts, deleteContract, fetchContractById } from './../../api/contract'
-import ArrowBack from '../../components/ArrowBack.vue'
-import HomePage from '../../components/HomePage.vue'
 import ButtonBase from '../../components/ButtonBase.vue'
 import { useRouter } from 'vue-router'
 import TitleBar from '../../components/TitleBar.vue'
 import Swal from 'sweetalert2'
+import CustomHeaderApp from '../../components/CustomHeaderApp.vue'
+
 
 export default {
   name: 'AmendingAgreementIndex',
   components: {
     TableBase,
-    ArrowBack,
-    HomePage,
     ButtonBase,
     TitleBar,
+    CustomHeaderApp,
   },
   setup() {
     const isOpen = ref(false)
@@ -142,18 +139,18 @@ export default {
       data.forEach(contrato => {
         if (contrato.id_tipo_contrato === 3) {
           amendingAgreement.value.push(contrato)
-          amendingAgreement.value.sort((a, b) => {
-            if (a.label > b.label) {
-              return 1;
-            }
-            if (a.label < b.label) {
-              return -1;
-            }
-            // a must be equal to b
-            return 0;
-          })
         }
       });
+      amendingAgreement.value.sort((a, b) => {
+        if (a.label > b.label) {
+          return 1;
+        }
+        if (a.label < b.label) {
+          return -1;
+        }
+        // a must be equal to b
+        return 0;
+      })
       /* amendingAgreement.value = data */
     }
     const featureOptions = [

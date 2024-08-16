@@ -9,21 +9,18 @@ const fetchFiltroAll = (params) =>
     params: params ? params : {},
   });
 
-
-const fetchResidentEstimateById = (id) =>
+const fetchBusqueda = (params) =>
   fetchApi({
-    url: `/estimacion_residente/${id}/`,
+    url: `/agenda_estimacion/busqueda/`,
     method: "GET",
+    params: params ? params : {},
   });
 
-const storeResidentEstimate = (residentEstimate) =>
+const fetchResponsableEstimacion = (params) =>
   fetchApi({
-    url: "/estimacion_residente/",
-    method: "POST",
-    data: residentEstimate,
+    url: `/agenda_estimacion/responsable_estimacion/`,
+    method: "GET",
+    params: params ? params : {},
   });
 
-
-export {
-  fetchFiltroAll,
-};
+export { fetchFiltroAll, fetchBusqueda, fetchResponsableEstimacion };

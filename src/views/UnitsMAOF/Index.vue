@@ -1,13 +1,10 @@
 <template>
   <main class="px-4 mt-10">
-    <div class="flex justify-between">
-      <arrow-back  />
-      <home-page />
-    </div>
+    <CustomHeaderApp />
     <title-bar title="Unidades MAOF" subtitle="Inicio" />
     <section class="px-4">
       <button-base label="Nueva Unidad MAOF" @click="goToNewResident" class="mb-3 mr-0 ml-auto" />
-      <table-base :options="featureOptions" :headers="headers" :data="resident" />
+      <table-base description="Unidades MAOF" :options="featureOptions" :headers="headers" :data="resident" />
     </section>
   </main>
 </template>
@@ -16,21 +13,19 @@
 import { ref } from 'vue'
 import TableBase from '../../components/TableBase.vue'
 import { fetchSICTUnits, deleteSICTUnits } from './../../api/SICTUnits'
-import ArrowBack from '../../components/ArrowBack.vue'
-import HomePage from '../../components/HomePage.vue'
 import ButtonBase from '../../components/ButtonBase.vue'
 import { useRouter } from 'vue-router'
 import TitleBar from '../../components/TitleBar.vue'
 import Swal from 'sweetalert2'
+import CustomHeaderApp from '../../components/CustomHeaderApp.vue'
 
 export default {
   name: 'UnitMAOFIndex',
   components: {
     TableBase,
-    ArrowBack,
-    HomePage,
     ButtonBase,
     TitleBar,
+    CustomHeaderApp,
   },
   setup() {
     const router = useRouter()

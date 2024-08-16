@@ -4,19 +4,19 @@
       class="mb-3" v-model="app.amendingAgreement.id_contrato_padre" @change="getInfoContrato()" />
     <select-base id="id_numero_proyecto" label="Número de proyecto (Cartera de Inversión)" :options="app.listProyects"
       class="mb-3" v-model="app.amendingAgreement.id_proyecto" disabled />
-    <select-base id="id_area_revisora" label="Contratista" :options="app.listContratista" class="mb-3"
+    <select-base id="id_contratista" label="Contratista" :options="app.listContratista" class="mb-3"
       v-model="app.amendingAgreement.id_contratista" disabled />
     <select-base id="id_empleado_maof" label="Unidad MAOF" :options="app.listReviewAreas" class="mb-3"
       v-model="app.amendingAgreement.id_area_revisora" disabled />
-    <input-base id="fecha_inicio_proyecto" label="Número de Convenio Modificatorio" type="text" class="mb-3"
+    <input-base id="numero_contrato" label="Número de Convenio Modificatorio" type="text" class="mb-3"
       v-model="app.amendingAgreement.numero_contrato" />
-    <text-area-base id="fecha_inicio_proyecto" label="Objeto" class="mb-3"
+    <text-area-base id="objeto_contrato" label="Objeto" class="mb-3"
       v-model="app.amendingAgreement.objeto_contrato" />
-    <input-base id="fecha_inicio_proyecto" label="Monto sin IVA" type="number" class="mb-3"
+    <input-base id="monto_sin_iva" label="Monto sin IVA" type="number" class="mb-3"
       v-model="app.amendingAgreement.monto_sin_iva" />
-    <input-base id="fecha_inicio_proyecto" label="Plazo (inicio)" type="date" class="mb-3"
+    <input-base id="plazo_inicio" label="Plazo (inicio)" type="date" class="mb-3"
       v-model="app.amendingAgreement.plazo_inicio" />
-    <input-base id="fecha_inicio_proyecto" label="Plazo (fin)" type="date" class="mb-3"
+    <input-base id="plazo_fin" label="Plazo (fin)" type="date" class="mb-3"
       v-model="app.amendingAgreement.plazo_fin" />
     <button-base label="Guardar" @click="sendForm" class="mr-0 ml-auto" />
   </div>
@@ -73,8 +73,8 @@ export default {
     })
     if (props.editMode) {
       app.amendingAgreement = props.amendingAgreement
-      app.amendingAgreement.plazo_inicio = props.amendingAgreement.plazo_inicio.split('-').reverse().join('-')
-      app.amendingAgreement.plazo_fin = props.amendingAgreement.plazo_fin.split('-').reverse().join('-')
+      app.amendingAgreement.plazo_inicio = props.amendingAgreement.plazo_inicio.split('/').reverse().join('-')
+      app.amendingAgreement.plazo_fin = props.amendingAgreement.plazo_fin.split('/').reverse().join('-')
     }
     const sendForm = () => emit('submit', app.amendingAgreement)
 
@@ -97,18 +97,18 @@ export default {
       data.forEach(contrato => {
         if (contrato.estatus_contratista === 'Activo') {
           app.listContratista.push({ value: contrato.id_contratista, label: contrato.nombre_contratista })
-          app.listContratista.sort((a, b) => {
-            if (a.label > b.label) {
-              return 1;
-            }
-            if (a.label < b.label) {
-              return -1;
-            }
-            // a must be equal to b
-            return 0;
-          })
         }
       });
+      app.listContratista.sort((a, b) => {
+        if (a.label > b.label) {
+          return 1;
+        }
+        if (a.label < b.label) {
+          return -1;
+        }
+        // a must be equal to b
+        return 0;
+      })
     }
     const getInfoContrato = async () => {
       const { data } = await fetchContractById(app.amendingAgreement.id_contrato_padre)

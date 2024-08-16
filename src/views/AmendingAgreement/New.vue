@@ -1,6 +1,6 @@
 <template>
   <main class="px-4 mt-10">
-    <arrow-back />
+    <CustomHeaderApp />
     <title-bar title="Convenio Modificatorio" subtitle="Nuevo" />
     <section class="px-4">
       <form-amending-agreement @submit="saveAmendingAgreement" />
@@ -10,18 +10,18 @@
 
 <script>
 import FormAmendingAgreement from '../../components/AmendingAgreement/FormAmendingAgreement.vue'
-import ArrowBack from '../../components/ArrowBack.vue'
 import TitleBar from '../../components/TitleBar.vue'
 import { storeContract } from '../../api/contract'
 import { useRouter } from 'vue-router'
 import Swal from 'sweetalert2'
+import CustomHeaderApp from '../../components/CustomHeaderApp.vue'
 
 export default {
   name: 'NewAmendingAgreement',
   components: {
     FormAmendingAgreement,
-    ArrowBack,
     TitleBar,
+    CustomHeaderApp,
   },
   setup() {
     const router = useRouter()

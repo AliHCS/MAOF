@@ -1,6 +1,6 @@
 <template>
   <main class="px-4 mt-10">
-    <arrow-back />
+    <CustomHeaderApp />
     <title-bar title="Contratos y Convenios de colaboración" subtitle="Nuevo" />
     <section class="px-4">
       <form-collaboration-agreements @submit="saveCollaborationAgreements" />
@@ -10,18 +10,20 @@
 
 <script>
 import FormCollaborationAgreements from '../../components/CollaborationAgreements/FormCollaborationAgreements.vue'
-import ArrowBack from '../../components/ArrowBack.vue'
 import TitleBar from '../../components/TitleBar.vue'
 import { storeContract } from '../../api/contract'
 import { useRouter } from 'vue-router'
 import Swal from 'sweetalert2'
+import CustomHeaderApp from '../../components/CustomHeaderApp.vue'
+
+
 
 export default {
   name: 'NewFormCollaborationAgreements',
   components: {
     FormCollaborationAgreements,
-    ArrowBack,
     TitleBar,
+    CustomHeaderApp,
   },
   setup() {
     const router = useRouter()

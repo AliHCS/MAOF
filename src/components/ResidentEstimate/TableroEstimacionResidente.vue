@@ -1,5 +1,8 @@
 <template>
-  <table class="border border-solid border-t-0 border-l-0  border-black border-collapse text-gray-900 w-full">
+  <table class="border border-solid border-t-0 border-l-0  border-black border-collapse text-gray-900 w-full"
+    aria-describedby="table1"
+  >
+    <caption class=" text-white">Tablero de estimaciones</caption>
     <Detail-Pop :data="dataContratoConvenio.data" :isOpen="isOpenContratoModal.isOpen"
       @submit="isOpenContratoModal.isOpen = false" />
 
@@ -19,7 +22,7 @@
           {{ contador + 1 }}
         </p>
         <img src="../../assets/PDF.png" @click="downloadFile(item)" class="cursor-pointer"
-          v-if="header.field === 'documents' && item.archivo_residente !== null">
+          v-if="header.field === 'documents' && item.archivo_residente !== null" title="PDF" alt="PDF">
         <p v-if="header.field === 'numero_contrato' && item.contrato_padre === null"
           class=" text-blue cursor-pointer contratos text-center" @click="detalleContrato(item)">
           {{ item[header.field] }}
@@ -48,7 +51,7 @@
           v-if="header.label === 'FINANZAS' && header.field === 'estatus_semaforo' && item[header.field] === 'Finanzas'">
           ab</button>
         <button class=" bg-orange rounded-full text-orange w-6" @click="semaforo(item)"
-          v-if="header.label === 'TRÁMITE DE PAGO' && header.field === 'estatus_semaforo' && item[header.field] === 'DGPOP'">
+          v-if="header.label === 'TRÁMITE DE PAGO' && header.field === 'estatus_semaforo' && item[header.field] === 'Tramite de Pago'">
           ab</button>
         <button class=" bg-green rounded-full text-green w-6" @click="semaforo(item)"
           v-if="header.label === 'PAGO' && header.field === 'estatus_semaforo' && item[header.field] === 'Pago Efectuado'">
@@ -63,12 +66,14 @@
         <div class="hidden absolute right-4 top-8 bg-white z-10" style="box-shadow: -3px 3px 6px #00000029;"
           :id="`table-actions-${contador}`" @mouseleave="openActions(`table-actions-${contador}`)">
           <div class="flex flex-col">
-            <div v-for="(option, index) in options" :key="index" class="h-8 flex justify-center items-center py-2 px-8">
-              <p class="text-xs border-b border-solid border-gray-100 cursor-pointer hover:border-gray hover:font-medium"
-                @click="option.action(item)">
-                {{ option.label }}
-              </p>
-            </div>
+            <template v-for="(option, index) in options" :key="index">
+              <div v-if="!option.disabled" class="h-8 flex justify-center items-center py-2 px-8">
+                <p class="text-xs border-b border-solid border-gray-100 cursor-pointer hover:border-gray hover:font-medium"
+                  @click="option.action(item)">
+                  {{ option.label }}
+                </p>
+              </div>
+            </template>
           </div>
         </div>
       </td>

@@ -1,7 +1,27 @@
-import axios from 'axios'
+import axios from "axios";
+import { auth } from "../store/auth";
 
-const API = import.meta.env.VITE_API
+const API = import.meta.env.VITE_API;
 
-export default axios.create({
+const axiosInstance = axios.create({
   baseURL: API,
-})
+  timeout: 1000,
+});
+
+axiosInstance.defaults.headers.common["Content-Type"] = `application/json`;
+
+axiosInstance.interceptors.request.use(
+  (config) => {
+    const store = auth();
+    const { access } = store.getAuthData;
+    if (access) {
+      config.headers.Authorization = `Bearer ${access}`;
+    }
+    return config;
+  },
+  (error) => {
+    return Promise.reject(error);
+  }
+);
+
+export default axiosInstance;

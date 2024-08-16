@@ -1,33 +1,21 @@
 <template>
   <main class="px-4 mt-10">
-    <div class="flex justify-between">
-      <arrow-back />
-      <home-page />
-    </div>
+    <CustomHeaderApp />
     <title-bar title="Consulta MAOF" subtitle="Agenda de Estimaciones" />
     <section class="px-4">
       <!-- Pendientes Pagadas Total -->
       <div class="flex justify-center text-3xl" v-if="!app.loading">
-        <div
-          class="px-10 text-red cursor-pointer"
-          @click="
-            getStatusEstimations(app.filtro.data.pendientes, 'pendientes')
-          "
-        >
+        <div class="px-10 text-red cursor-pointer" @click="
+          getStatusEstimations(app.filtro.data.pendientes, 'pendientes')
+          ">
           <p class="text-center">{{ app.filtro.data.pendientes.length }}</p>
           <h1 class="text-center">Pendientes</h1>
         </div>
-        <div
-          class="px-10 text-green cursor-pointer"
-          @click="getStatusEstimations(app.filtro.data.pagados, 'pagadas')"
-        >
+        <div class="px-10 text-green cursor-pointer" @click="getStatusEstimations(app.filtro.data.pagados, 'pagadas')">
           <p class="text-center">{{ app.filtro.data.pagados.length }}</p>
           <h1 class="text-center">Pagadas</h1>
         </div>
-        <div
-          class="px-10 cursor-pointer"
-          @click="getStatusEstimations(app.filtro.data.totales, 'totales')"
-        >
+        <div class="px-10 cursor-pointer" @click="getStatusEstimations(app.filtro.data.totales, 'totales')">
           <p class="text-center">{{ app.filtro.data.totales.length }}</p>
           <h1 class="text-center">Total</h1>
         </div>
@@ -35,85 +23,10 @@
       <!-- Filtro y Busqueda -->
       <div class="flex flex-col mt-20">
         <!-- Filtro -->
-        <div class="flex justify-start items-center pb-10">
-          <img
-            src="../../assets/Filter.png"
-            alt="filter"
-            class="w-10 items-center"
-          />
-          <select-base
-            label="Filtros"
-            class="text-center w-48 mr-10"
-            id="filtros"
-            :options="app.filtro.listFiltros"
-            v-model="app.filtro.tipoDocumento"
-            @change="getDocsByType(app.filtro.tipoDocumento)"
-          />
-          <select-base
-            label=""
-            class="text-center w-48 ml-36"
-            id="filtrosDocs"
-            :options="app.filtro.listDocsFiltrados"
-            v-if="
-              app.filtro.listDocsFiltrados != '' &&
-              app.filtro.tipoDocumento !== ''
-            "
-            v-model="app.filtro.filtroDocValue"
-          />
-          <button-base
-            label="Aplicar"
-            class="border-gray text-black hover:bg-white hover:text-red"
-            :class="{
-              'ml-[36rem]': app.filtro.tipoDocumento === '1',
-              ' ml-[3.7rem]':
-                app.filtro.tipoDocumento !== '1' &&
-                app.filtro.filtroDocValue === '',
-              ' ml-[0rem]':
-                app.filtro.tipoDocumento !== '1' &&
-                app.filtro.filtroDocValue !== '',
-            }"
-            v-if="
-              app.filtro.listDocsFiltrados != '' &&
-              app.filtro.tipoDocumento !== ''
-            "
-            @click="
-              saveFiltro(app.filtro.filtroDocValue, app.filtro.tipoDocumento)
-            "
-            :disabled="app.filtro.filtroDocValue === ''"
-          />
-          <button-base
-            label="Aplicar"
-            class="ml-40 border-gray text-black hover:bg-white hover:text-red"
-            v-if="app.filtro.tipoDocumento === '4'"
-            @click="esperandoAccion()"
-          />
-        </div>
-        <!--         Id tipoDocumento {{ app.filtro.tipoDocumento }}
-        <br />
-        id filtroDocValue {{ app.filtro.filtroDocValue }} -->
+        <Filtro :filtro="app.filtro" :getDocsByType="getDocsByType" :saveFiltro="saveFiltro"
+          :esperandoAccion="esperandoAccion" />
         <!-- Busqueda -->
-        <div class="flex justify-start items-center pt-10">
-          <img
-            src="../../assets/Search.png"
-            alt="filter"
-            class="w-10 items-center"
-          />
-          <h1 class="text-center font-bold text-lg">Búsqueda</h1>
-          <!-- <select-base label="Filtros" class="text-center w-48" id="filtros"/> -->
-          <button-base
-            label="Criterio de búsqueda"
-            class="ml-5 border-gray text-black hover:bg-white hover:text-red"
-            @click="showBusqueda"
-          />
-        </div>
-      </div>
-      <div class="flex justify-center">
-        <!-- Form Busqueda -->
-        <form-consulta-busqueda
-          @submit="saveBusqueda"
-          class="mt-20"
-          v-if="showBusquedaValue"
-        />
+        <Busqueda :showBusquedaValue="showBusquedaValue" :showBusqueda="showBusqueda" :saveBusqueda="saveBusqueda" />
       </div>
     </section>
   </main>
@@ -122,46 +35,42 @@
 <script>
 import { ref } from "vue";
 import TableBase from "../../components/UsersAndRolsMAOF/TableUsers.vue";
-import ArrowBack from "../../components/ArrowBack.vue";
-import HomePage from "../../components/HomePage.vue";
 import SelectBase from "../../components/SelectBase.vue";
 import ButtonBase from "../../components/ButtonBase.vue";
 import { useRouter } from "vue-router";
 import TitleBar from "../../components/TitleBar.vue";
 import FormConsultaBusqueda from "../../components/Consulta/FormConsultaBusqueda.vue";
 import Swal from "sweetalert2";
-import { fetchProjectsActive } from "./../../api/project";
+import { fetchProjects } from "./../../api/project";
 import { fetchContracts } from "./../../api/contract";
-import { fetchFiltroAll } from "../../api/consulta";
+import { fetchFiltroAll, fetchBusqueda, fetchResponsableEstimacion } from "../../api/consulta";
 import { consultas } from "../../store/consultas";
+import Filtro from "../../components/Consulta/Filtro.vue";
+import Busqueda from "../../components/Consulta/Busqueda.vue";
+import CustomHeaderApp from '../../components/CustomHeaderApp.vue'
 
 export default {
   name: "UsersRolesMAOFIndex",
   components: {
     TableBase,
-    ArrowBack,
-    HomePage,
     ButtonBase,
     TitleBar,
     SelectBase,
     FormConsultaBusqueda,
+    Filtro,
+    Busqueda,
+    CustomHeaderApp,
   },
   setup() {
     const router = useRouter();
     const store = consultas();
-    const headers = [
-      {
-        label: "Id",
-        field: "empleado_maof",
-      },
-    ];
     const app = ref({
       filtro: {
         tipoDocumento: "",
         listFiltros: [
           { value: 2, label: "Contrato o Convenio de Colaboración" },
           { value: 3, label: "Convenio Modificatorio" },
-          /* { value: 4, label: "Esperando una acción" }, */
+          { value: 4, label: "Estimaciones bajo su responsabilidad" },
           { value: 1, label: "Proyecto / Cartera de inversión" },
         ],
         listDocsFiltrados: [],
@@ -174,8 +83,9 @@ export default {
       },
       loading: true,
     });
+
     let showBusquedaValue = ref(false);
-    const featureOptions = [];
+
     const getStatusEstimations = (estimacion, estatus) => {
       switch (estatus) {
         case "pendientes":
@@ -185,7 +95,6 @@ export default {
               name: "ConsultasPedientesMAOF",
             });
           } else {
-            console.log("No hay estimaciones pendientes");
             Swal.fire(
               "No hay estimaciones",
               "Intenta con otro filtro",
@@ -200,7 +109,6 @@ export default {
               name: "ConsultasPagadosMAOF",
             });
           } else {
-            console.log("No hay estimaciones pagadas");
             Swal.fire(
               "No hay estimaciones",
               "Intenta con otro filtro",
@@ -215,7 +123,6 @@ export default {
               name: "ConsultasTotalesMAOF",
             });
           } else {
-            console.log("No hay estimaciones totales");
             Swal.fire(
               "No hay estimaciones",
               "Intenta con otro filtro",
@@ -229,6 +136,7 @@ export default {
           break;
       }
     };
+    
     const getDocsByType = async (id) => {
       if (showBusquedaValue.value === true) {
         showBusquedaValue.value = false;
@@ -265,54 +173,71 @@ export default {
     };
 
     const getProjects = async () => {
-      const { data } = await fetchProjectsActive();
-      app.value.filtro.listDocsFiltrados = data.map((project) => ({
-        value: project.id_proyecto,
-        label: `${project.clave_cartera}-${project.nombre_proyecto}`,
-      }));
+      const params = {
+        estatus_proyecto: 3,
+        activate_filters: true
+      }
+      try {
+        const { data } = await fetchProjects(params);
+        app.value.filtro.listDocsFiltrados = data.map((project) => ({
+          value: project.id_proyecto,
+          label: `${project.clave_cartera}-${project.nombre_proyecto}`,
+        }));
+      } catch (error) {
+        Swal.fire("Error", `${error.response.data.detail}`, "error");
+        app.value.filtro.tipoDocumento = "";
+        app.value.filtro.filtroDocValue = "";
+      }
     };
 
     const getContracts = async (id) => {
-      const { data } = await fetchContracts();
-      if (id === "2") {
-        data.forEach((contract) => {
-          if (contract.id_tipo_contrato !== 3) {
-            app.value.filtro.listDocsFiltrados.push({
-              value: contract.id_contrato,
-              label: contract.numero_contrato,
-            });
-            app.value.filtro.listDocsFiltrados.sort((a, b) => {
-              if (a.label > b.label) {
-                return 1;
-              }
-              if (a.label < b.label) {
-                return -1;
-              }
-              // a must be equal to b
-              return 0;
-            });
-          }
-        });
-      }
-      if (id === "3") {
-        data.forEach((contract) => {
-          if (contract.id_tipo_contrato === 3) {
-            app.value.filtro.listDocsFiltrados.push({
-              value: contract.id_contrato,
-              label: contract.numero_contrato,
-            });
-            app.value.filtro.listDocsFiltrados.sort((a, b) => {
-              if (a.label > b.label) {
-                return 1;
-              }
-              if (a.label < b.label) {
-                return -1;
-              }
-              // a must be equal to b
-              return 0;
-            });
-          }
-        });
+      const params = { activate_filters: true }
+      try {
+        const { data } = await fetchContracts(params);
+        if (id === "2") {
+          data.forEach((contract) => {
+            if (contract.id_tipo_contrato !== 3) {
+              app.value.filtro.listDocsFiltrados.push({
+                value: contract.id_contrato,
+                label: contract.numero_contrato,
+              });
+            }
+          });
+          app.value.filtro.listDocsFiltrados.sort((a, b) => {
+            if (a.label > b.label) {
+              return 1;
+            }
+            if (a.label < b.label) {
+              return -1;
+            }
+            // a must be equal to b
+            return 0;
+          });
+        }
+        if (id === "3") {
+          data.forEach((contract) => {
+            if (contract.id_tipo_contrato === 3) {
+              app.value.filtro.listDocsFiltrados.push({
+                value: contract.id_contrato,
+                label: contract.numero_contrato,
+              });
+            }
+          });
+          app.value.filtro.listDocsFiltrados.sort((a, b) => {
+            if (a.label > b.label) {
+              return 1;
+            }
+            if (a.label < b.label) {
+              return -1;
+            }
+            // a must be equal to b
+            return 0;
+          });
+        }
+      } catch (error) {
+        Swal.fire("Error", `${error.response.data.detail}`, "error");
+        app.value.filtro.tipoDocumento = "";
+        app.value.filtro.filtroDocValue = "";
       }
     };
 
@@ -329,25 +254,62 @@ export default {
       } */
     };
 
-    const saveBusqueda = async (criterios) => {
-      console.log("Criterios de busqueda: ", criterios);
-      /* try {
-        await storeProject(project)
-        Swal.fire(
-          '¡Éxito!',
-          '!Proyecto guardado con éxito!',
-          'success'
-        )
-        router.push({ name: 'Projects' })
-    
+    const infoToStore = (pendiente, pagado, total) => {
+      store.addPendientes(pendiente);
+      store.addPagados(pagado);
+      store.addTotal(total);
+    };
+
+    const getFiltroDefault = async () => {
+      app.value.loading = true;
+      try {
+        const { data } = await fetchFiltroAll();
+        app.value.filtro.data.totales = data.total;
+        app.value.filtro.data.pagados = data.pagadas;
+        app.value.filtro.data.pendientes = data.pendiente;
+        infoToStore(data.pendiente, data.pagadas, data.total);
       } catch (error) {
-        Swal.fire(
-          'Error',
-          `${error.response.data.detail}`,
-          'error'
-        )
-      } */
-      showBusqueda();
+        Swal.fire("Error", `${error.response.data.detail}`, "error");
+        router.push({
+          name: "Home",
+        })
+      }
+      app.value.loading = false;
+    };
+
+    const saveBusqueda = async (criterios) => {
+      //Funcion para construir los parametros enviados
+      const params = Object.entries(criterios)
+        .filter(([clave, valor]) => {
+          if (Array.isArray(valor)) {
+            return valor.length > 0;
+          } else {
+            return valor !== "";
+          }
+        })
+        .reduce((resultado, [clave, valor]) => {
+          if (Array.isArray(valor)) {
+            resultado[clave] = valor.join(",");
+          } else {
+            resultado[clave] = valor;
+          }
+          return resultado;
+        }, {});
+      try {
+        const { data } = await fetchBusqueda(params);
+        if (data.length) {
+          store.addBusqueda(data);
+          router.push({
+            name: "ConsultasBusquedaMAOF",
+          });
+        } else {
+          Swal.fire("Error", `No hay resultados para estos criterios`, "error");
+
+        }
+      } catch (error) {
+        Swal.fire("Error", `${error.response.data.detail}`, "error");
+        showBusqueda()
+      }
     };
 
     const saveFiltro = async (id_doc, id_typeDoc) => {
@@ -366,38 +328,27 @@ export default {
       app.value.loading = false;
     };
 
-    const infoToStore = (pendiente, pagado, total) => {
-      store.addPendientes(pendiente);
-      store.addPagados(pagado);
-      store.addTotal(total);
-    };
-
-    const getFiltroDefault = async () => {
+    const esperandoAccion = async () => {
       app.value.loading = true;
-      let pagado = [];
-      let pendiente = [];
-      const { data } = await fetchFiltroAll();
-      data.forEach((element) => {
-        if (element.estatus_semaforo !== "Pago Efectuado") {
-          pendiente.push(element);
-        } else {
-          pagado.push(element);
-        }
-      });
-      app.value.filtro.data.totales = data;
-      app.value.filtro.data.pagados = pagado;
-      app.value.filtro.data.pendientes = pendiente;
-      infoToStore(pendiente, pagado, data);
-      app.value.loading = false;
-    };
+      try {
+        const { data } = await fetchResponsableEstimacion()
+        store.addResponsableEstimacion(data)
+        app.value.loading = false;
+        router.push({
+          name: "ResponsableEstimacionMAOF",
+        });
+      } catch (error) {
+        Swal.fire("Error", `${error.response.data.detail}`, "error");
+        app.value.filtro.tipoDocumento = "";
+        app.value.filtro.filtroDocValue = "";
+        app.value.loading = false;
+      }
+    }
 
     getFiltroDefault();
 
     return {
       app,
-      featureOptions,
-      headers,
-      /* listFiltros, */
       showBusquedaValue,
       getStatusEstimations,
       showBusqueda,
@@ -408,6 +359,7 @@ export default {
       getContracts,
       getFiltroDefault,
       infoToStore,
+      esperandoAccion,
     };
   },
 };

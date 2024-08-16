@@ -2,12 +2,16 @@
   <main class="px-4 mt-10">
     <div class="flex justify-between">
       <arrow-back  />
-      <home-page />
+      <div>
+        <home-page/>
+        <logout-component/>
+      </div>
     </div>
     <title-bar title="Contratos" subtitle="Inicio" />
     <section class="px-4">
       <button-base label="Nuevo contrato" @click="goToNewContract" class="mb-3 mr-0 ml-auto" />
       <table-base
+        description="Contratos"
         :options="featureOptions"
         :headers="headers"
         :data="contract"
@@ -25,6 +29,7 @@ import HomePage from '../../components/HomePage.vue'
 import ButtonBase from '../../components/ButtonBase.vue'
 import { useRouter } from 'vue-router'
 import TitleBar from '../../components/TitleBar.vue'
+import LogoutComponent from '../../components/LogoutComponent.vue'
 
 export default {
   name: 'ContractsIndex',
@@ -34,6 +39,7 @@ export default {
     HomePage,
     ButtonBase,
     TitleBar,
+    LogoutComponent
   },
   setup() {
     const router = useRouter()
@@ -73,7 +79,6 @@ export default {
     ]
     const contract = ref([])
     const getContracts = async () => {
-      console.log('Hola mundo');
       const { data } = await fetchContracts()
       contract.value = data
     }

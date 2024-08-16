@@ -57,9 +57,9 @@
       class=" text-red font-semibold text-center ml-80"> {{ error.$message }} </span>
 
 
-    <input-base id="porcentaje_Avance_fisico" label="% de avance físico" type="number" class="mb-3"
-      v-model="app.residentEstimate.porcentaje_Avance_fisico" />
-    <span v-if="v$.porcentaje_Avance_fisico.$error" v-for="error in  v$.porcentaje_Avance_fisico.$errors" :key="error"
+    <input-base id="porcentaje_avance_fisico" label="% de avance físico" type="number" class="mb-3"
+      v-model="app.residentEstimate.porcentaje_avance_fisico" />
+    <span v-if="v$.porcentaje_avance_fisico.$error" v-for="error in  v$.porcentaje_avance_fisico.$errors" :key="error"
       class=" text-red font-semibold text-center ml-80"> {{ error.$message }} </span>
 
 
@@ -84,6 +84,7 @@ import { useRouter } from 'vue-router'
 import Swal from 'sweetalert2'
 import useVuelidate from '@vuelidate/core'
 import { required, helpers, minValue, maxValue } from '@vuelidate/validators'
+import { auth } from '../../store/auth'
 
 export default {
   name: 'FormResidentEstimate',
@@ -104,6 +105,9 @@ export default {
     TextAreaBase,
   },
   setup(props) {
+    const authStore = auth();
+
+    const { rol } = authStore.getAuthData;
     const router = useRouter()
     const app = reactive({
       residentEstimate: {
@@ -117,7 +121,7 @@ export default {
         grado_avance_obra: '',
         porcentaje_avance_estimacion: '',
         porcentaje_avance_estimacion_acumulado: '',
-        porcentaje_Avance_fisico: '',
+        porcentaje_avance_fisico: '',
         porcensaje_avance_financiero: '',
       },
       fecha_recepcion_info_contratista: '',
@@ -155,7 +159,7 @@ export default {
           maxValue: helpers.withMessage('El valor maximo es 100%', maxValue(100)),
           minValue: helpers.withMessage('El valor minimo es 0%', minValue(0))
         },
-        porcentaje_Avance_fisico: {
+        porcentaje_avance_fisico: {
           maxValue: helpers.withMessage('El valor maximo es 100%', maxValue(100)),
           minValue: helpers.withMessage('El valor minimo es 0%', minValue(0))
         },
@@ -256,6 +260,7 @@ export default {
       app,
       sendForm,
       v$,
+      rol
     }
   },
 }
